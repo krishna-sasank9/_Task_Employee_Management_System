@@ -1,0 +1,43 @@
+package employeemanagement;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class UpdateEmployee {
+    private static final Logger logger = Logger.getLogger(UpdateEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+    private final BufferedReader br;
+
+    public UpdateEmployee(Map<Integer, Map<String, String>> employeeDetails, BufferedReader br) {
+        this.employeeDetails = employeeDetails;
+        this.br = br;
+    }
+
+    public void updateEmployee() throws IOException {
+        logger.info("Enter Employee ID to update: ");
+        int empId = Integer.parseInt(br.readLine());
+        if (employeeDetails.containsKey(empId)) {
+            Map<String, String> employee = employeeDetails.get(empId);
+            logger.info("Enter Updated Email: ");
+            employee.put("Email", br.readLine());
+            logger.info("Enter Updated Designation: ");
+            employee.put("Designation", br.readLine());
+            logger.info("Enter Updated Salary: ");
+            employee.put("Salary", br.readLine());
+            logger.info("Enter Updated Address: ");
+            employee.put("Address", br.readLine());
+            logger.info("Enter Updated Aadhar Number: ");
+            employee.put("AadharNumber", br.readLine());
+            logger.info("Enter Updated PAN Card Number: ");
+            employee.put("PanCardNumber", br.readLine());
+
+            employeeDetails.put(empId, employee);
+            logger.log(Level.INFO, "Employee updated with ID: " + empId);
+        } else {
+            logger.log(Level.INFO, "Employee with ID " + empId + " not found.");
+        }
+    }
+}
