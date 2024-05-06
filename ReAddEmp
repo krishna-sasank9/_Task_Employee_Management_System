@@ -1,0 +1,51 @@
+package employeemanagement;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class ReAddEmployee {
+    private static final Logger logger = Logger.getLogger(ReAddEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+    private final BufferedReader br;
+
+    public ReAddEmployee(Map<Integer, Map<String, String>> employeeDetails, BufferedReader br) {
+        this.employeeDetails = employeeDetails;
+        this.br = br;
+    }
+
+    public void reAddRemovedEmployee() throws IOException {
+        logger.info("Enter Employee ID to re-add: ");
+        int empId = Integer.parseInt(br.readLine());
+        if (employeeDetails.containsKey(empId)) {
+            logger.log(Level.INFO, "Employee with ID " + empId + " already exists.");
+        } else {
+            logger.info("Employee details to re-add:");
+            Map<String, String> employee = new HashMap<>();
+            logger.info("Enter Employee Name: ");
+            employee.put("Name", br.readLine());
+            logger.info("Enter Father's Name: ");
+            employee.put("FatherName", br.readLine());
+            logger.info("Enter Mother's Name: ");
+            employee.put("MotherName", br.readLine());
+            logger.info("Enter Email: ");
+            employee.put("Email", br.readLine());
+            logger.info("Enter Designation: ");
+            employee.put("Designation", br.readLine());
+            logger.info("Enter Salary: ");
+            employee.put("Salary", br.readLine());
+            logger.info("Enter Address: ");
+            employee.put("Address", br.readLine());
+            logger.info("Enter Aadhar Number: ");
+            employee.put("AadharNumber", br.readLine());
+            logger.info("Enter PAN Card Number: ");
+            employee.put("PanCardNumber", br.readLine());
+
+            employeeDetails.put(empId, employee);
+            logger.log(Level.INFO, "Employee re-added with ID: " + empId);
+        }
+    }
+}
