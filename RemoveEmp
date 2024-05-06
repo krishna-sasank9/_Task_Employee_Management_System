@@ -1,0 +1,29 @@
+package employeemanagement;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class RemoveEmployee {
+    private static final Logger logger = Logger.getLogger(RemoveEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+    private final BufferedReader br;
+
+    public RemoveEmployee(Map<Integer, Map<String, String>> employeeDetails, BufferedReader br) {
+        this.employeeDetails = employeeDetails;
+        this.br = br;
+    }
+
+    public void removeEmployee() throws IOException {
+        logger.info("Enter Employee ID to remove: ");
+        int empId = Integer.parseInt(br.readLine());
+        if (employeeDetails.containsKey(empId)) {
+            employeeDetails.remove(empId);
+            logger.log(Level.INFO, "Employee removed with ID: " + empId);
+        } else {
+            logger.info("Employee with ID " + empId + " not found.");
+        }
+    }
+}
