@@ -1,0 +1,370 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class EmploymentManagementSystem {
+    private static final Logger logger = Logger.getLogger(EmploymentManagementSystem.class.getName());
+    private static final String XML_FILE_PATH = "employee_data.xml";
+    private static final Map<Integer, Map<String, String>> employeeDetails = new HashMap<>();
+
+    public static void main(String[] args) {
+        loadEmployeeDataFromXML();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        UserInteraction userInteraction = new UserInteraction(br);
+        AddEmployee addEmployee = new AddEmployee(employeeDetails, br);
+        RemoveEmployee removeEmployee = new RemoveEmployee(employeeDetails, br);
+        UpdateEmployee updateEmployee = new UpdateEmployee(employeeDetails, br);
+        ReAddEmployee reAddEmployee = new ReAddEmployee(employeeDetails, br);
+        ViewEmployee viewEmployee = new ViewEmployee(employeeDetails);
+
+        while (true) {
+            try {
+                int choice = userInteraction.getMenuChoice();
+                switch (choice) {
+                    case 1:
+                        addEmployee.addEmployee();
+                        break;
+                    case 2:
+                        removeEmployee.removeEmployee();
+                        break;
+                    case 3:
+                        updateEmployee.updateEmployee();
+                        break;
+                    case 4:
+                        viewEmployee.viewEmployeeDetails();
+                        break;
+                    case 5:
+                        reAddEmployee.reAddRemovedEmployee();
+                        break;
+                    case 6:
+                        saveEmployeeDataToXML();
+                        System.exit(0);
+                    default:
+                        logger.warning("Invalid choice! Please enter a number between 1 and 6.");
+                }
+            } catch (IOException | NumberFormatException e) {
+                logger.log(Level.SEVERE, "Error reading input: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void loadEmployeeDataFromXML() {
+        try (BufferedReader br = new BufferedReader(new FileReader(XML_FILE_PATH))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                int empId = Integer.parseInt(parts[0]);
+                Map<String, String> employee = new HashMap<>();
+                for (int i = 1; i < parts.length; i++) {
+                    String[] detail = parts[i].split(":");
+                    employee.put(detail[0], detail[1]);
+                }
+                employeeDetails.put(empId, employee);
+            }
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error loading data from XML file: " + e.getMessage());
+        }
+    }
+
+    private static void saveEmployeeDataToXML() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(XML_FILE_PATH))) {
+            for (Map.Entry<Integer, Map<String, String>> entry : employeeDetails.entrySet()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(entry.getKey()).append(",");
+                Map<String, String> employee = entry.getValue();
+                for (Map.Entry<String, String> detail : employee.entrySet()) {
+                    sb.append(detail.getKey()).append(":").append(detail.getValue()).append(",");
+                }
+                bw.write(sb.toString());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error saving data to XML file: " + e.getMessage());
+        }
+    }
+}
+
+class UserInteraction {
+    private static final Logger logger = Logger.getLogger(UserInteraction.class.getName());
+    private final BufferedReader br;
+
+    public UserInteraction(BufferedReader br) {
+        this.br = br;
+    }
+
+    public int getMenuChoice() throws IOException {
+        logger.info("\n1. Add Employee");
+        logger.info("2. Remove Employee");
+        logger.info("3. Update Employee");
+        logger.info("4. View Employee Details");
+        logger.info("5. Re-add Removed Employee");
+        logger.info("6. Exit");
+        logger.info("Enter your choice: ");
+        return Integer.parseInt(br.readLine());
+    }
+
+    public int getEmployeeID() throws IOException {
+        logger.info("Enter Employee ID: ");
+        return Integer.parseInt(br.readLine());
+    }
+}
+
+class AddEmployee {
+    private static final Logger logger = Logger.getLogger(AddEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+    private final BufferedReader br;
+    private int nextEmployeeId;
+
+    public AddEmployee(Map<Integer, Map<String, String>> employeeDetails, BufferedReader br) {
+        this.employeeDetails = employeeDetails;
+        this.br = br;
+        this.nextEmployeeId = 1;
+    }
+
+    public void addEmployee() throws IOException {
+        Map<String, String> employee = new HashMap<>();
+        
+        // Validate and add name
+        logger.info("Enter Employee Name: ");
+        String name = br.readLine();
+        if (isValidName(name)) {
+            employee.put("Name", name);
+        } else {
+            logger.warning("Invalid name. Please enter a valid name.");
+            return;
+        }
+        
+        // Validate and add father's name
+        logger.info("Enter Father's Name: ");
+        String fatherName = br.readLine();
+        if (isValidName(fatherName)) {
+            employee.put("FatherName", fatherName);
+        } else {
+            logger.warning("Invalid father's name. Please enter a valid name.");
+            return;
+        }
+        
+        // Validate and add mother's name
+        logger.info("Enter Mother's Name: ");
+        String motherName = br.readLine();
+        if (isValidName(motherName)) {
+            employee.put("MotherName", motherName);
+        } else {
+            logger.warning("Invalid mother's name. Please enter a valid name.");
+            return;
+        }
+        
+        // Validate and add email
+        logger.info("Enter Email: ");
+        String email = br.readLine();
+        if (isValidEmail(email)) {
+            employee.put("Email", email);
+        } else {
+            logger.warning("Invalid email. Please enter a valid email.");
+            return;
+        }
+        
+        // Validate and add designation
+        logger.info("Enter Designation: ");
+        String designation = br.readLine();
+        if (!designation.isEmpty()) {
+            employee.put("Designation", designation);
+        } else {
+            logger.warning("Designation cannot be empty. Please enter a valid designation.");
+            return;
+        }
+        
+        // Validate and add salary
+        logger.info("Enter Salary: ");
+        String salary = br.readLine();
+        if (isValidSalary(salary)) {
+            employee.put("Salary", salary);
+        } else {
+            logger.warning("Invalid salary. Please enter a valid salary (numeric value).");
+            return;
+        }
+        
+        // Validate and add address
+        logger.info("Enter Address: ");
+        String address = br.readLine();
+        if (!address.isEmpty()) {
+            employee.put("Address", address);
+        } else {
+            logger.warning("Address cannot be empty. Please enter a valid address.");
+            return;
+        }
+        
+        // Validate and add Aadhar number
+        logger.info("Enter Aadhar Number: ");
+        String aadharNumber = br.readLine();
+        if (isValidAadharNumber(aadharNumber)) {
+            employee.put("AadharNumber", aadharNumber);
+        } else {
+            logger.warning("Invalid Aadhar number. Please enter a valid Aadhar number (12 digits).");
+            return;
+        }
+        
+        // Validate and add PAN card number
+        logger.info("Enter PAN Card Number: ");
+        String panCardNumber = br.readLine();
+        if (isValidPanCardNumber(panCardNumber)) {
+            employee.put("PanCardNumber", panCardNumber);
+        } else {
+            logger.warning("Invalid PAN Card number. Please enter a valid PAN Card number.");
+            return;
+        }
+
+        employeeDetails.put(nextEmployeeId, employee);
+        logger.log(Level.INFO, "Employee added with ID: " + nextEmployeeId);
+        nextEmployeeId++;
+    }
+    
+    private boolean isValidName(String name) {
+        return name.matches("[a-zA-Z]+");
+    }
+    
+    private boolean isValidEmail(String email) {
+        return email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+    }
+    
+    private boolean isValidSalary(String salary) {
+        return salary.matches("\\d+");
+    }
+    
+    private boolean isValidAadharNumber(String aadharNumber) {
+        return aadharNumber.matches("\\d{12}");
+    }
+    
+    private boolean isValidPanCardNumber(String panCardNumber) {
+        return panCardNumber.matches("[A-Z]{5}[0-9]{4}[A-Z]{1}");
+    }
+}
+
+class RemoveEmployee {
+    private static final Logger logger = Logger.getLogger(RemoveEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+    private final BufferedReader br;
+
+    public RemoveEmployee(Map<Integer, Map<String, String>> employeeDetails, BufferedReader br) {
+        this.employeeDetails = employeeDetails;
+        this.br = br;
+    }
+
+    public void removeEmployee() throws IOException {
+        logger.info("Enter Employee ID to remove: ");
+        int empId = Integer.parseInt(br.readLine());
+        if (employeeDetails.containsKey(empId)) {
+            employeeDetails.remove(empId);
+            logger.log(Level.INFO, "Employee removed with ID: " + empId);
+        } else {
+            logger.info("Employee with ID " + empId + " not found.");
+        }
+    }
+}
+
+class UpdateEmployee {
+    private static final Logger logger = Logger.getLogger(UpdateEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+    private final BufferedReader br;
+
+    public UpdateEmployee(Map<Integer, Map<String, String>> employeeDetails, BufferedReader br) {
+        this.employeeDetails = employeeDetails;
+        this.br = br;
+    }
+
+    public void updateEmployee() throws IOException {
+        logger.info("Enter Employee ID to update: ");
+        int empId = Integer.parseInt(br.readLine());
+        if (employeeDetails.containsKey(empId)) {
+            Map<String, String> employee = employeeDetails.get(empId);
+            logger.info("Enter Updated Email: ");
+            employee.put("Email", br.readLine());
+            logger.info("Enter Updated Designation: ");
+            employee.put("Designation", br.readLine());
+            logger.info("Enter Updated Salary: ");
+            employee.put("Salary", br.readLine());
+            logger.info("Enter Updated Address: ");
+            employee.put("Address", br.readLine());
+            logger.info("Enter Updated Aadhar Number: ");
+            employee.put("AadharNumber", br.readLine());
+            logger.info("Enter Updated PAN Card Number: ");
+            employee.put("PanCardNumber", br.readLine());
+
+            employeeDetails.put(empId, employee);
+            logger.log(Level.INFO, "Employee updated with ID: " + empId);
+        } else {
+            logger.log(Level.INFO, "Employee with ID " + empId + " not found.");
+        }
+    }
+}
+
+class ReAddEmployee {
+    private static final Logger logger = Logger.getLogger(ReAddEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+    private final BufferedReader br;
+
+    public ReAddEmployee(Map<Integer, Map<String, String>> employeeDetails, BufferedReader br) {
+        this.employeeDetails = employeeDetails;
+        this.br = br;
+    }
+
+    public void reAddRemovedEmployee() throws IOException {
+        logger.info("Enter Employee ID to re-add: ");
+        int empId = Integer.parseInt(br.readLine());
+        if (employeeDetails.containsKey(empId)) {
+            logger.log(Level.INFO, "Employee with ID " + empId + " already exists.");
+        } else {
+            logger.info("Employee details to re-add:");
+            Map<String, String> employee = new HashMap<>();
+            logger.info("Enter Employee Name: ");
+            employee.put("Name", br.readLine());
+            logger.info("Enter Father's Name: ");
+            employee.put("FatherName", br.readLine());
+            logger.info("Enter Mother's Name: ");
+            employee.put("MotherName", br.readLine());
+            logger.info("Enter Email: ");
+            employee.put("Email", br.readLine());
+            logger.info("Enter Designation: ");
+            employee.put("Designation", br.readLine());
+            logger.info("Enter Salary: ");
+            employee.put("Salary", br.readLine());
+            logger.info("Enter Address: ");
+            employee.put("Address", br.readLine());
+            logger.info("Enter Aadhar Number: ");
+            employee.put("AadharNumber", br.readLine());
+            logger.info("Enter PAN Card Number: ");
+            employee.put("PanCardNumber", br.readLine());
+
+            employeeDetails.put(empId, employee);
+            logger.log(Level.INFO, "Employee re-added with ID: " + empId);
+        }
+    }
+}
+
+class ViewEmployee {
+    private static final Logger logger = Logger.getLogger(ViewEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+
+    public ViewEmployee(Map<Integer, Map<String, String>> employeeDetails) {
+        this.employeeDetails = employeeDetails;
+    }
+
+    public void viewEmployeeDetails() {
+        for (Map.Entry<Integer, Map<String, String>> entry : employeeDetails.entrySet()) {
+            logger.info("Employee ID: " + entry.getKey());
+            Map<String, String> employee = entry.getValue();
+            for (Map.Entry<String, String> detail : employee.entrySet()) {
+                logger.info(detail.getKey() + ": " + detail.getValue());
+            }
+            logger.info("");
+        }
+    }
+}
