@@ -1,0 +1,24 @@
+package employeemanagement;
+
+import java.util.Map;
+import java.util.logging.Logger;
+
+public class ViewEmployee {
+    private static final Logger logger = Logger.getLogger(ViewEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+
+    public ViewEmployee(Map<Integer, Map<String, String>> employeeDetails) {
+        this.employeeDetails = employeeDetails;
+    }
+
+    public void viewEmployeeDetails() {
+        for (Map.Entry<Integer, Map<String, String>> entry : employeeDetails.entrySet()) {
+            logger.info("Employee ID: " + entry.getKey());
+            Map<String, String> employee = entry.getValue();
+            for (Map.Entry<String, String> detail : employee.entrySet()) {
+                logger.info(detail.getKey() + ": " + detail.getValue());
+            }
+            logger.info("");
+        }
+    }
+}
