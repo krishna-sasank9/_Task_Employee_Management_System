@@ -1,0 +1,139 @@
+package employeemanagement;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class AddEmployee {
+    private static final Logger logger = Logger.getLogger(AddEmployee.class.getName());
+    private final Map<Integer, Map<String, String>> employeeDetails;
+    private final BufferedReader br;
+    private int nextEmployeeId;
+
+    public AddEmployee(Map<Integer, Map<String, String>> employeeDetails, BufferedReader br) {
+        this.employeeDetails = employeeDetails;
+        this.br = br;
+        this.nextEmployeeId = 1;
+    }
+
+    public void addEmployee() throws IOException {
+        Map<String, String> employee = new HashMap<>();
+        
+        // Validate and add name
+        logger.info("Enter Employee Name: ");
+        String name = br.readLine();
+        if (isValidName(name)) {
+            employee.put("Name", name);
+        } else {
+            logger.warning("Invalid name. Please enter a valid name.");
+            return;
+        }
+        
+        // Validate and add father's name
+        logger.info("Enter Father's Name: ");
+        String fatherName = br.readLine();
+        if (isValidName(fatherName)) {
+            employee.put("FatherName", fatherName);
+        } else {
+            logger.warning("Invalid father's name. Please enter a valid name.");
+            return;
+        }
+        
+        // Validate and add mother's name
+        logger.info("Enter Mother's Name: ");
+        String motherName = br.readLine();
+        if (isValidName(motherName)) {
+            employee.put("MotherName", motherName);
+        } else {
+            logger.warning("Invalid mother's name. Please enter a valid name.");
+            return;
+        }
+        
+        // Validate and add email
+        logger.info("Enter Email: ");
+        String email = br.readLine();
+        if (isValidEmail(email)) {
+            employee.put("Email", email);
+        } else {
+            logger.warning("Invalid email. Please enter a valid email.");
+            return;
+        }
+        
+        // Validate and add designation
+        logger.info("Enter Designation: ");
+        String designation = br.readLine();
+        if (!designation.isEmpty()) {
+            employee.put("Designation", designation);
+        } else {
+            logger.warning("Designation cannot be empty. Please enter a valid designation.");
+            return;
+        }
+        
+        // Validate and add salary
+        logger.info("Enter Salary: ");
+        String salary = br.readLine();
+        if (isValidSalary(salary)) {
+            employee.put("Salary", salary);
+        } else {
+            logger.warning("Invalid salary. Please enter a valid salary (numeric value).");
+            return;
+        }
+        
+        // Validate and add address
+        logger.info("Enter Address: ");
+        String address = br.readLine();
+        if (!address.isEmpty()) {
+            employee.put("Address", address);
+        } else {
+            logger.warning("Address cannot be empty. Please enter a valid address.");
+            return;
+        }
+        
+        // Validate and add Aadhar number
+        logger.info("Enter Aadhar Number: ");
+        String aadharNumber = br.readLine();
+        if (isValidAadharNumber(aadharNumber)) {
+            employee.put("AadharNumber", aadharNumber);
+        } else {
+            logger.warning("Invalid Aadhar number. Please enter a valid Aadhar number (12 digits).");
+            return;
+        }
+        
+        // Validate and add PAN card number
+        logger.info("Enter PAN Card Number: ");
+        String panCardNumber = br.readLine();
+        if (isValidPanCardNumber(panCardNumber)) {
+            employee.put("PanCardNumber", panCardNumber);
+        } else {
+            logger.warning("Invalid PAN Card number. Please enter a valid PAN Card number.");
+            return;
+        }
+
+        employeeDetails.put(nextEmployeeId, employee);
+        logger.log(Level.INFO, "Employee added with ID: " + nextEmployeeId);
+        nextEmployeeId++;
+    }
+    
+    private boolean isValidName(String name) {
+        return name.matches("[a-zA-Z]+");
+    }
+    
+    private boolean isValidEmail(String email) {
+        return email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+    }
+    
+    private boolean isValidSalary(String salary) {
+        return salary.matches("\\d+");
+    }
+    
+    private boolean isValidAadharNumber(String aadharNumber) {
+        return aadharNumber.matches("\\d{12}");
+    }
+    
+    private boolean isValidPanCardNumber(String panCardNumber) {
+        return panCardNumber.matches("[A-Z]{5}[0-9]{4}[A-Z]{1}");
+    }
+}
