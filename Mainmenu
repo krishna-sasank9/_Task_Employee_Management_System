@@ -1,0 +1,30 @@
+package userinteraction;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.logging.Logger;
+
+public class UserInteraction {
+    private static final Logger logger = Logger.getLogger(UserInteraction.class.getName());
+    private final BufferedReader br;
+
+    public UserInteraction(BufferedReader br) {
+        this.br = br;
+    }
+
+    public int getMenuChoice() throws IOException {
+        logger.info("\n1. Add Employee");
+        logger.info("2. Remove Employee");
+        logger.info("3. Update Employee");
+        logger.info("4. View Employee Details");
+        logger.info("5. Re-add Removed Employee");
+        logger.info("6. Exit");
+        logger.info("Enter your choice: ");
+        return Integer.parseInt(br.readLine());
+    }
+
+    public String getEmployeeID() throws IOException {
+        logger.info("Enter Employee ID: ");
+        return br.readLine();
+    }
+}
